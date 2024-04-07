@@ -16,7 +16,7 @@ const clientsecret = process.env.CLIENT_SECRET;
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "https://fr-zushi-92ywvgtbi-aditya-abhirams-projects.vercel.app",
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
   })
@@ -110,7 +110,7 @@ app.get(
   "/auth/google/callback",
   async (req, res, next) => {
     passport.authenticate("google", {
-      failureRedirect: "http://localhost:3000/login",
+      failureRedirect: "https://fr-zushi-92ywvgtbi-aditya-abhirams-projects.vercel.app/login",
     })(req, res, next);
   },
   async (req, res) => {
@@ -131,7 +131,7 @@ app.get(
     }
 
     if (expectedRole !== userType) {
-      res.redirect("http://localhost:3000/error"); // Redirect to error page if roles mismatch
+      res.redirect("https://fr-zushi-92ywvgtbi-aditya-abhirams-projects.vercel.app/error"); // Redirect to error page if roles mismatch
       return;
     }
 
@@ -178,7 +178,7 @@ app.get(
     }
 
     res.redirect(
-      `http://localhost:3000/${
+      `https://fr-zushi-92ywvgtbi-aditya-abhirams-projects.vercel.app/${
         userType === "teacher" ? "teachers/TeacherHome" : "students/StudentHome"
       }/${userId}`
     );
@@ -205,7 +205,7 @@ app.get("/logout", (req, res, next) => {
     if (err) {
       return next(err);
     }
-    res.redirect("http://localhost:3000/");
+    res.redirect("https://fr-zushi-92ywvgtbi-aditya-abhirams-projects.vercel.app/");
   });
 });
 
