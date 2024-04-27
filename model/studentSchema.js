@@ -9,6 +9,14 @@ const studentSchema = new mongoose.Schema({
     secondDegree: String,
     cg: String,
     drafts: Array,  // Ensure drafts is of type Array
+    resume:{
+        resumeUrl: String,
+        resumeName: String
+    },
+    performanceSheet:{
+        performanceSheetUrl: String,
+        performanceSheetName: String
+    }
 });
 
 const studentdb = mongoose.model("student", studentSchema);
