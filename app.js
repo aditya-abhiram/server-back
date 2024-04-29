@@ -16,7 +16,7 @@ const clientsecret = process.env.CLIENT_SECRET;
 
 app.use(
   cors({
-    origin: "https://project-bridge-pju05uuv8-aditya-abhirams-projects.vercel.app",
+    origin: "http://localhost:3000",
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
   })
@@ -110,7 +110,7 @@ app.get(
   "/auth/google/callback",
   async (req, res, next) => {
     passport.authenticate("google", {
-      failureRedirect: "https://project-bridge-pju05uuv8-aditya-abhirams-projects.vercel.app/login",
+      failureRedirect: "http://localhost:3000/login",
     })(req, res, next);
   },
   async (req, res) => {
@@ -131,7 +131,7 @@ app.get(
     }
 
     if (expectedRole !== userType) {
-      res.redirect("https://project-bridge-pju05uuv8-aditya-abhirams-projects.vercel.app/error"); // Redirect to error page if roles mismatch
+      res.redirect("http://localhost:3000/error"); // Redirect to error page if roles mismatch
       return;
     }
 
@@ -180,7 +180,7 @@ app.get(
     }
 
     res.redirect(
-      `https://project-bridge-pju05uuv8-aditya-abhirams-projects.vercel.app/${
+      `http://localhost:3000/${
         userType === "teacher" ? "teachers/TeacherHome" : "students/StudentHome"
       }/${userId}`
     );
@@ -207,7 +207,7 @@ app.get("/logout", (req, res, next) => {
     if (err) {
       return next(err);
     }
-    res.redirect("https://project-bridge-pju05uuv8-aditya-abhirams-projects.vercel.app/");
+    res.redirect("http://localhost:3000/");
   });
 });
 
