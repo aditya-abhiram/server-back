@@ -20,7 +20,6 @@ exports.getData = async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
       }
 };
-
 // exports.updateData = async (req, res) => {
 //     // Logic for updating Student data
 //     try {
@@ -207,7 +206,6 @@ exports.deleteLikedProjects = async(req, res) => {
     }
 }
 
-// POST /saveDraft endpoint
 exports.saveDrafts = async (req, res) => {
   const { studentId, projectId } = req.params;
 
@@ -256,7 +254,6 @@ exports.saveDrafts = async (req, res) => {
   }
 };
 
-
 exports.getDraftDetails = async (req, res) => {
   const { studentId, projectId } = req.params;
 
@@ -291,9 +288,10 @@ exports.deleteDraft = async (req, res) => {
     // Find the index of the draft with the specified projectId
     const draftIndex = student.drafts.findIndex(draft => draft.projectId === projectId);
 
-    // If draft is not found, return an error response
+    // If draft is not found, return a success response
     if (draftIndex === -1) {
-      return res.status(404).json({ message: 'Draft not found' });
+      // You can customize the success message as needed
+      return res.status(200).json({ message: 'Draft not found, but deletion operation completed successfully' });
     }
 
     // Remove the draft from the drafts array
@@ -309,8 +307,8 @@ exports.deleteDraft = async (req, res) => {
     console.error('Error deleting draft:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
-
 };
+
 
 exports.getProjectStatus = async (req, res) => {
   try {
@@ -337,5 +335,52 @@ exports.getProjectStatus = async (req, res) => {
   } catch (error) {
     console.error("Error fetching project status:", error);
     return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.getSentRequests = async (req, res) => {
+  try {
+    const { userId } = req.params; // Get userId from URL params
+    const studentId = userId; // Store userId as studentId
+
+    // Search for requests with matching studentId
+    const requests = await requestdb.find({ "requests.studentId": studentId });
+
+    // Prepare response data
+    const requestData = [];
+    for (const request of requests) {
+      const project = await projectdb.findById(request.projectId); // Find project by projectId
+
+      // If project is null (deleted or not found), skip it
+      if (!project) {
+        continue;
+      }
+
+      // Extract required details
+      const { project_name, project_type, project_description, project_domain, project_slots, filled_slots, teacherId} = project;
+      const { status } = request.requests.find(req => req.studentId === studentId);
+      // const {  } = request.requests.find(req => req.studentId === studentId);
+      const teacher = await teacherdb.findOne({ teacherId });
+      if (!teacher) {
+        continue;
+      }
+      const {name, department} = teacher;
+
+      requestData.push({
+        projectId: request.projectId,
+        projectName: project_name,
+        projectType: project_type,
+        prof_name: name,
+        department: department,
+        project_slots: project_slots,
+        filled_slots: filled_slots,
+        status: status,
+      });
+    }
+
+    res.status(200).json(requestData);
+  } catch (error) {
+    console.error("Error fetching sent requests:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

@@ -16,7 +16,7 @@ const clientsecret = process.env.CLIENT_SECRET;
 
 app.use(
   cors({
-    origin: "https://project-bridge-4tdny0dz5-aditya-abhirams-projects.vercel.app",
+    origin: "http://localhost:3000",
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
   })
@@ -29,13 +29,14 @@ const userRoutes = require("./routes/userRoutes");
 const teacherRoutes = require("./routes/teacherRoutes");
 const studentRoutes = require("./routes/studentRoutes");
 const requestRoutes = require("./routes/requestRoutes");
+const adminRoutes = require("./routes/adminRoutes")
 
 app.use("/projects", projectRoutes);
 app.use("/users", userRoutes);
 app.use("/teachers", teacherRoutes);
 app.use("/students", studentRoutes);
 app.use("/requests", requestRoutes);
-
+app.use("/admin", adminRoutes)
 app.use(
   session({
     secret: "8642957315",
@@ -69,7 +70,10 @@ passport.use(
             ? profile.emails[0].value.startsWith("f")
               ? "student"
               : "other"
-            : "teacher";
+            : profile.emails[0].value === "shashank.sam03@gmail.com"
+              ? "admin"
+              : "teacher";
+
           // profile.emails[0].value.startsWith('f') ? 'student' : 'teacher' : 'other'; (Actual code while deploying)
           user = new userdb({
             googleId: profile.id,
@@ -110,7 +114,7 @@ app.get(
   "/auth/google/callback",
   async (req, res, next) => {
     passport.authenticate("google", {
-      failureRedirect: "https://project-bridge-4tdny0dz5-aditya-abhirams-projects.vercel.app/login",
+      failureRedirect: "http://localhost:3000/login",
     })(req, res, next);
   },
   async (req, res) => {
@@ -118,26 +122,34 @@ app.get(
     const userEmail = req.user.email;
     let expectedRole = "";
 
-    if (userEmail.includes("@hyderabad.bits-pilani.ac.in")) {
+     if (userEmail.includes("@hyderabad.bits-pilani.ac.in")) {
       if (userEmail.startsWith("f")) {
         expectedRole = "student";
       } else {
         expectedRole = "other";
-        // expectedRole = 'teacher';(Final code while deploying)
       }
+    } else if (userEmail === "shashank.sam03@gmail.com") {
+      expectedRole = "admin";
     } else {
       expectedRole = "teacher";
-      // expectedRole = 'other';(Final code while deploying)
     }
 
     if (expectedRole !== userType) {
-      res.redirect("https://project-bridge-4tdny0dz5-aditya-abhirams-projects.vercel.app/error"); // Redirect to error page if roles mismatch
+      res.redirect("http://localhost:3000/error"); // Redirect to error page if roles mismatch
+      return;
+    }
+
+    if (expectedRole === "admin") {
+      const userId = req.user.googleId; // Extract userId from Google account
+      res.redirect(`http://localhost:3000/admin/adminHome/${userId}`);
       return;
     }
 
     const userId = req.user.googleId; // Extract userId from Google account
     const name = req.user.displayName;
     // Check if the user already exists in the respective collection
+
+
     let userExists = false;
     if (userType === "teacher") {
       userExists = await teacherdb.exists({ teacherId: userId });
@@ -180,7 +192,7 @@ app.get(
     }
 
     res.redirect(
-      `https://project-bridge-4tdny0dz5-aditya-abhirams-projects.vercel.app/${
+      `http://localhost:3000/${
         userType === "teacher" ? "teachers/TeacherHome" : "students/StudentHome"
       }/${userId}`
     );
@@ -207,7 +219,7 @@ app.get("/logout", (req, res, next) => {
     if (err) {
       return next(err);
     }
-    res.redirect("https://project-bridge-4tdny0dz5-aditya-abhirams-projects.vercel.app/");
+    res.redirect("http://localhost:3000/");
   });
 });
 
